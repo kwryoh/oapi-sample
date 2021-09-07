@@ -1,0 +1,202 @@
+openapi: 3.0.0
+info:
+  title: Sample item OpenAPI
+  version: '1.0'
+  description: It's sample API Document
+  contact:
+    name: Ryoh Kawai
+    email: kawairyoh@gmail.com
+    url: 'https://github.com/rwkawai'
+  license:
+    name: MIT
+servers:
+  - url: 'http://localhost:9000'
+paths:
+  /items:
+    get:
+      summary: GetItems
+      tags:
+        - items
+      operationId: GetItems
+      description: 商品情報を取得
+      responses:
+        '200':
+          $ref: '#/components/responses/ResponseItems'
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+    post:
+      summary: PostItems
+      operationId: PostItems
+      responses:
+        '201':
+          $ref: '#/components/responses/ResponseItem'
+      description: 商品情報の登録
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestItem'
+        description: ''
+      tags:
+        - items
+    parameters: []
+  '/items/{item_id}':
+    parameters:
+      - $ref: '#/components/parameters/item_id'
+    get:
+      summary: Get Item
+      tags:
+        - items
+      responses:
+        '200':
+          $ref: '#/components/responses/ResponseItem'
+        '404':
+          description: Not Found
+      operationId: GetItemById
+      description: 商品情報を取得
+    delete:
+      summary: DeleteItemById
+      operationId: DeleteItemById
+      responses:
+        '204':
+          description: No Content
+        '404':
+          description: Not Found
+      tags:
+        - items
+      description: 商品情報を単体削除
+    patch:
+      summary: PatchItemById
+      operationId: PatchItemById
+      responses:
+        '200':
+          $ref: '#/components/responses/ResponseItem'
+        '404':
+          description: Not Found
+      description: 商品情報を更新
+      tags:
+        - items
+components:
+  schemas:
+    Item:
+      title: Item
+      type: object
+      description: 商品モデル
+      x-tags:
+        - items
+      x-examples: {}
+      properties:
+        id:
+          $ref: '#/components/schemas/Id'
+        code:
+          type: string
+          pattern: '^[A-Z][A-Z0-9]+'
+          example: CODE001
+          description: 商品コード
+        name:
+          type: string
+          default: undefined
+          description: 商品名
+        unit:
+          type: string
+          description: 単位
+        cost:
+          type: number
+          default: 0
+          description: 原価
+          format: float
+        created:
+          type: string
+          format: date-time
+          description: 作成日時
+          readOnly: true
+        updated:
+          type: string
+          format: date-time
+          description: 更新日時
+          readOnly: true
+      required:
+        - id
+        - code
+        - name
+        - unit
+        - cost
+        - created
+        - updated
+    RequestItem:
+      title: RequestItem
+      type: object
+      description: 商品登録時の商品情報
+      properties:
+        code:
+          type: string
+          pattern: '^[A-Z][A-Z0-9]+'
+          description: 商品コード
+        name:
+          type: string
+          description: 商品名
+        unit:
+          type: string
+          description: 単位
+        cost:
+          type: number
+          format: float
+          description: 原価
+      required:
+        - code
+        - name
+        - unit
+        - cost
+    Id:
+      type: integer
+      title: Id
+      description: 主キー型
+      x-go-type: uint64
+      format: int64
+      readOnly: true
+  securitySchemes: {}
+  parameters:
+    item_id:
+      name: item_id
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/Id'
+      description: 商品ID
+    limit:
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+      description: 上限
+    offset:
+      name: offset
+      in: query
+      required: false
+      schema:
+        type: integer
+      description: スタートページ
+  responses:
+    ResponseItems:
+      description: Example response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              items:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Item'
+          examples: {}
+    ResponseItem:
+      description: Example response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Item'
+          examples: {}
+tags:
+  - name: items
