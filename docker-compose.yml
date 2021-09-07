@@ -1,7 +1,4 @@
 version: "3"
-volumes:
-  - pgdata
-  - appdata
 
 services:
   app:
@@ -27,3 +24,9 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: pgpassword
+
+volumes:
+  appdata:
+    driver: local
+  pgdata:
+    driver: local
