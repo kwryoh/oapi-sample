@@ -6,7 +6,7 @@ info:
   contact:
     name: Ryoh Kawai
     email: kawairyoh@gmail.com
-    url: 'https://github.com/rwkawai'
+    url: 'https://github.com/kwryoh'
   license:
     name: MIT
 servers:
@@ -106,12 +106,12 @@ components:
           default: 0
           description: 原価
           format: float
-        created:
+        createdAt:
           type: string
           format: date-time
           description: 作成日時
           readOnly: true
-        updated:
+        updatedAt:
           type: string
           format: date-time
           description: 更新日時
@@ -122,8 +122,8 @@ components:
         - name
         - unit
         - cost
-        - created
-        - updated
+        - createdAt
+        - updatedAt
     RequestItem:
       title: RequestItem
       type: object
