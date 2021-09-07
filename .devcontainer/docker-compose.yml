@@ -8,8 +8,11 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    command: sleep infinity
+    tty: true
+    stdin_open: true
     volumes:
-      - appdata:/workspace/
+      - ..:/workspace:cached
     ports:
       - 9000:9000
     depends_on:
@@ -26,7 +29,5 @@ services:
       POSTGRES_PASSWORD: pgpassword
 
 volumes:
-  appdata:
-    driver: local
   pgdata:
     driver: local
