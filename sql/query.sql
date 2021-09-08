@@ -1,10 +1,10 @@
---- name: SelectItems :many
+-- name: SelectItems :many
 select * from items order by code;
 
---- name: SelectItemById :one
+-- name: SelectItemById :one
 select * from items where id = $1 limit 1;
 
---- name: InsertItem :one
+-- name: InsertItem :one
 insert into items (
     name, code, unit, cost
 ) VALUES (
@@ -12,5 +12,5 @@ insert into items (
 )
 returning *;
 
---- name: DeleteItemById :exec
+-- name: DeleteItemById :exec
 delete from items where id = $1;
