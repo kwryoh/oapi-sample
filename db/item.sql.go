@@ -105,3 +105,42 @@ func (q *Queries) SelectItems(ctx context.Context) ([]Item, error) {
 	}
 	return items, nil
 }
+
+const updateItemById = `-- name: UpdateItemById :one
+update items
+set name = $2
+  , code = $3
+  , unit = $4
+  , cost = $5
+where id = $1
+returning id, name, code, unit, cost, created_at, updated_at
+`
+
+type UpdateItemByIdParams struct {
+	ID   uint64 `json:"id"`
+	Name string `json:"name"`
+	Code string `json:"code"`
+	Unit string `json:"unit"`
+	Cost string `json:"cost"`
+}
+
+func (q *Queries) UpdateItemById(ctx context.Context, arg UpdateItemByIdParams) (Item, error) {
+	row := q.db.QueryRowContext(ctx, updateItemById,
+		arg.ID,
+		arg.Name,
+		arg.Code,
+		arg.Unit,
+		arg.Cost,
+	)
+	var i Item
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Code,
+		&i.Unit,
+		&i.Cost,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}

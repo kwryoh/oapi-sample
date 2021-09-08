@@ -12,5 +12,14 @@ insert into items (
 )
 returning *;
 
+-- name: UpdateItemById :one
+update items
+set name = $2
+  , code = $3
+  , unit = $4
+  , cost = $5
+where id = $1
+returning *;
+
 -- name: DeleteItemById :exec
 delete from items where id = $1;
