@@ -1,4 +1,4 @@
-package openapi
+package main
 
 import (
 	"encoding/json"
@@ -7,28 +7,29 @@ import (
 	"time"
 
 	"github.com/go-chi/render"
+	"github.com/kwryoh/oapi-sample/openapi"
 )
 
 type ItemStore struct {
-	Items  map[Id]Item
-	NextId Id
+	Items  map[openapi.Id]openapi.Item
+	NextId openapi.Id
 	Lock   sync.Mutex
 }
 
-var _ ServerInterface = (*ItemStore)(nil)
+var _ openapi.ServerInterface = (*ItemStore)(nil)
 
 func NewItemStore() *ItemStore {
 	return &ItemStore{
-		Items:  make(map[Id]Item),
+		Items:  make(map[openapi.Id]openapi.Item),
 		NextId: 1000,
 	}
 }
 
-func (i *ItemStore) GetItems(w http.ResponseWriter, r *http.Request, params GetItemsParams) {
+func (i *ItemStore) GetItems(w http.ResponseWriter, r *http.Request, params openapi.GetItemsParams) {
 	i.Lock.Lock()
 	defer i.Lock.Unlock()
 
-	var result []Item
+	var result []openapi.Item
 
 	for _, item := range i.Items {
 		result = append(result, item)
@@ -45,7 +46,7 @@ func (i *ItemStore) GetItems(w http.ResponseWriter, r *http.Request, params GetI
 }
 
 func (i *ItemStore) PostItems(w http.ResponseWriter, r *http.Request) {
-	var newItem RequestItem
+	var newItem openapi.RequestItem
 	if err := json.NewDecoder(r.Body).Decode(&newItem); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		render.JSON(w, r, "Invalid format for PostItem")
@@ -55,7 +56,7 @@ func (i *ItemStore) PostItems(w http.ResponseWriter, r *http.Request) {
 	i.Lock.Lock()
 	defer i.Lock.Unlock()
 
-	var item Item
+	var item openapi.Item
 	item.Code = newItem.Code
 	item.Name = newItem.Name
 	item.Unit = newItem.Unit
@@ -71,20 +72,20 @@ func (i *ItemStore) PostItems(w http.ResponseWriter, r *http.Request) {
 	render.JSON(w, r, item)
 }
 
-func (i *ItemStore) DeleteItemById(w http.ResponseWriter, r *http.Request, itemId ItemId) {
-	var result Item
+func (i *ItemStore) DeleteItemById(w http.ResponseWriter, r *http.Request, itemId openapi.ItemId) {
+	var result openapi.Item
 
 	render.JSON(w, r, result)
 }
 
-func (i *ItemStore) GetItemById(w http.ResponseWriter, r *http.Request, itemId ItemId) {
-	var result Item
+func (i *ItemStore) GetItemById(w http.ResponseWriter, r *http.Request, itemId openapi.ItemId) {
+	var result openapi.Item
 
 	render.JSON(w, r, result)
 }
 
-func (i *ItemStore) PatchItemById(w http.ResponseWriter, r *http.Request, itemId ItemId) {
-	var result Item
+func (i *ItemStore) PatchItemById(w http.ResponseWriter, r *http.Request, itemId openapi.ItemId) {
+	var result openapi.Item
 
 	render.JSON(w, r, result)
 }
