@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"log"
@@ -10,12 +11,16 @@ import (
 	"github.com/go-chi/chi/v5"
 
 	middleware "github.com/deepmap/oapi-codegen/pkg/chi-middleware"
+	db "github.com/kwryoh/oapi-sample/db"
 	api "github.com/kwryoh/oapi-sample/openapi"
 )
 
-var db *sql.DB
+var conn *sql.DB
+var queries db.Queries
+var ctx context.Context
 
 const (
+	dbdriver = "postgres"
 	dbname = "example"
 	dbpass = "pgpassword"
 	dbuser = "postgres"
@@ -27,12 +32,15 @@ func main() {
 	dbsource := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
 		dbhost, dbport, dbuser, dbpass, dbname, "disable"
 	)
-	db, err := sql.Open("postgres", dbsource)
-	defer db.Close()
+	conn, err = sql.Open(dbdriver, dbsource)
 	if err != nil {
 		fmt.Println()
 	}
+	defer conn.Close()
 
+	ctx := context.Background()
+
+	queries = db.New(conn)
 
 	swagger, err := api.GetSwagger()
 	if err != nil {
