@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
@@ -12,7 +13,27 @@ import (
 	api "github.com/kwryoh/oapi-sample/openapi"
 )
 
+var db *sql.DB
+
+const (
+	dbname = "example"
+	dbpass = "pgpassword"
+	dbuser = "postgres"
+	dbhost = "db"
+	dbport = "5432"
+)
+
 func main() {
+	dbsource := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
+		dbhost, dbport, dbuser, dbpass, dbname, "disable"
+	)
+	db, err := sql.Open("postgres", dbsource)
+	defer db.Close()
+	if err != nil {
+		fmt.Println()
+	}
+
+
 	swagger, err := api.GetSwagger()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error loading swagger spec¥n: %s", err)
