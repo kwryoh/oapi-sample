@@ -9,7 +9,7 @@ import (
 	"github.com/go-chi/chi/v5"
 
 	middleware "github.com/deepmap/oapi-codegen/pkg/chi-middleware"
-	api "github.com/kwryoh/oapi-sample/gen"
+	api "github.com/kwryoh/oapi-sample/openapi"
 )
 
 func main() {

@@ -1,4 +1,4 @@
-package gen
+package openapi
 
 import (
 	"encoding/json"
@@ -60,8 +60,8 @@ func (i *ItemStore) PostItems(w http.ResponseWriter, r *http.Request) {
 	item.Name = newItem.Name
 	item.Unit = newItem.Unit
 	item.Cost = newItem.Cost
-	item.Created = time.Now()
-	item.Updated = time.Now()
+	item.CreatedAt = time.Now()
+	item.UpdatedAt = time.Now()
 	item.Id = i.NextId
 	i.NextId = i.NextId + 1
 
