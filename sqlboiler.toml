@@ -1,11 +1,12 @@
+pkgname  = "db"
 output   = "db"
 wipe     = false
 no-tests = true
 
 [psql]
 dbname  = "example"
-host    = "localhost"
+host    = "db"
 port    = "5432"
 user    = "postgres"
 pass    = "pgpassword"
-sslmode = "false"
+sslmode = "disable"
