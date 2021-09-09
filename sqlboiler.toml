@@ -1,5 +1,5 @@
 pkgname  = "db"
-output   = "db"
+output   = "gen/db"
 wipe     = false
 no-tests = true
 

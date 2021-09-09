@@ -1,6 +1,6 @@
 version: "1"
 packages:
-- path: "db"
+- path: "gen/db"
   name: "db"
   engine: "postgresql"
   schema: "sql/schema/"

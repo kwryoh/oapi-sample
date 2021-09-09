@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/go-chi/render"
-	"github.com/kwryoh/oapi-sample/openapi"
+	"github.com/kwryoh/oapi-sample/gen/openapi"
 )
 
 type ItemStore struct {
