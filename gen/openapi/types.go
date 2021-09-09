@@ -63,7 +63,7 @@ type ResponseItem Item
 
 // ResponseItems defines model for ResponseItems.
 type ResponseItems struct {
-	Items *[]Item `json:"items,omitempty"`
+	Items []Item `json:"items"`
 }
 
 // GetItemsParams defines parameters for GetItems.

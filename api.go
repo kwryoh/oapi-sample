@@ -29,7 +29,7 @@ func NewItemStore() *ItemStore {
 }
 
 func (i *ItemStore) GetItems(w http.ResponseWriter, r *http.Request, params openapi.GetItemsParams) {
-	var result []openapi.Item
+	var result openapi.ResponseItems
 
 	var limit int32 = 10
 	if params.Limit != nil {
@@ -47,7 +47,7 @@ func (i *ItemStore) GetItems(w http.ResponseWriter, r *http.Request, params open
 	var items []db.Item
 	items, err := queries.ListItems(ctx, arg)
 	if err != nil {
-		log.Printf("Cannot retrieve items: ", err)
+		log.Print("Cannot retrieve items: ", err)
 	}
 
 	for _, dbitem := range items {
@@ -66,7 +66,7 @@ func (i *ItemStore) GetItems(w http.ResponseWriter, r *http.Request, params open
 			Cost:      float32(cost),
 		}
 
-		result = append(result, item)
+		result.Items = append(result.Items, item)
 	}
 
 	render.JSON(w, r, result)
@@ -87,13 +87,26 @@ func (i *ItemStore) PostItems(w http.ResponseWriter, r *http.Request) {
 		Cost: fmt.Sprintf("%g", reqItem.Cost),
 	}
 
-	newItem, err := queries.CreateItem(ctx, params)
+	dbItem, err := queries.CreateItem(ctx, params)
 	if err != nil {
 		log.Fatal("Could not insert item ", err)
 	}
 
+	cost, err := strconv.ParseFloat(dbItem.Cost, 32)
+	if err != nil {
+		cost = 0.0
+	}
+	result := openapi.ResponseItem{
+		Id:        openapi.Id(dbItem.ID),
+		Code:      dbItem.Code,
+		Name:      dbItem.Name,
+		Unit:      dbItem.Unit,
+		Cost:      float32(cost),
+		CreatedAt: dbItem.CreatedAt,
+		UpdatedAt: dbItem.UpdatedAt,
+	}
 	w.WriteHeader(http.StatusCreated)
-	render.JSON(w, r, newItem)
+	render.JSON(w, r, result)
 }
 
 func (i *ItemStore) DeleteItemById(w http.ResponseWriter, r *http.Request, itemId openapi.ItemId) {

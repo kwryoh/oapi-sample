@@ -192,6 +192,9 @@ components:
                 type: array
                 items:
                   $ref: '#/components/schemas/Item'
+                readOnly: true
+            required:
+              - items
           examples: {}
     ResponseItem:
       description: Example response
