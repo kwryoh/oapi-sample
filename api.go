@@ -2,10 +2,11 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"sync"
-	"time"
 
 	"github.com/go-chi/render"
 	"github.com/kwryoh/oapi-sample/gen/db"
@@ -28,6 +29,8 @@ func NewItemStore() *ItemStore {
 }
 
 func (i *ItemStore) GetItems(w http.ResponseWriter, r *http.Request, params openapi.GetItemsParams) {
+	var result []openapi.Item
+
 	var limit int32 = 10
 	if params.Limit != nil {
 		limit = int32(*params.Limit)
@@ -44,47 +47,53 @@ func (i *ItemStore) GetItems(w http.ResponseWriter, r *http.Request, params open
 	var items []db.Item
 	items, err := queries.ListItems(ctx, arg)
 	if err != nil {
-		log.Fatal("Cannot retrieve items: ", err)
+		log.Printf("Cannot retrieve items: ", err)
 	}
 
-	var result []openapi.Item
 	for _, dbitem := range items {
-		var item openapi.Item
-
-		j, _ := json.Marshal(dbitem)
-		if err := json.Unmarshal(j, &item); err != nil {
-			log.Fatal("cannot convert DB to RESTAPI: ", err)
+		cost, err := strconv.ParseFloat(dbitem.Cost, 32)
+		if err != nil {
+			cost = 0.0
 		}
+
+		item := openapi.Item{
+			Id:        openapi.Id(dbitem.ID),
+			Code:      dbitem.Code,
+			Name:      dbitem.Name,
+			Unit:      dbitem.Unit,
+			CreatedAt: dbitem.CreatedAt,
+			UpdatedAt: dbitem.UpdatedAt,
+			Cost:      float32(cost),
+		}
+
+		result = append(result, item)
 	}
 
 	render.JSON(w, r, result)
 }
 
 func (i *ItemStore) PostItems(w http.ResponseWriter, r *http.Request) {
-	var newItem openapi.RequestItem
-	if err := json.NewDecoder(r.Body).Decode(&newItem); err != nil {
+	var reqItem openapi.RequestItem
+	if err := json.NewDecoder(r.Body).Decode(&reqItem); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		render.JSON(w, r, "Invalid format for PostItem")
 		return
 	}
 
-	i.Lock.Lock()
-	defer i.Lock.Unlock()
+	params := db.CreateItemParams{
+		Code: reqItem.Code,
+		Name: reqItem.Name,
+		Unit: reqItem.Unit,
+		Cost: fmt.Sprintf("%g", reqItem.Cost),
+	}
 
-	var item openapi.Item
-	item.Code = newItem.Code
-	item.Name = newItem.Name
-	item.Unit = newItem.Unit
-	item.Cost = newItem.Cost
-	item.CreatedAt = time.Now()
-	item.UpdatedAt = time.Now()
-	item.Id = i.NextId
-	i.NextId = i.NextId + 1
-
-	i.Items[item.Id] = item
+	newItem, err := queries.CreateItem(ctx, params)
+	if err != nil {
+		log.Fatal("Could not insert item ", err)
+	}
 
 	w.WriteHeader(http.StatusCreated)
-	render.JSON(w, r, item)
+	render.JSON(w, r, newItem)
 }
 
 func (i *ItemStore) DeleteItemById(w http.ResponseWriter, r *http.Request, itemId openapi.ItemId) {
