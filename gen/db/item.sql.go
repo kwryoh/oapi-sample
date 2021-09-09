@@ -71,12 +71,12 @@ func (q *Queries) GetItemById(ctx context.Context, id uint64) (Item, error) {
 	return i, err
 }
 
-const listItem = `-- name: ListItem :many
+const listItems = `-- name: ListItems :many
 select id, name, code, unit, cost, created_at, updated_at from items order by code
 `
 
-func (q *Queries) ListItem(ctx context.Context) ([]Item, error) {
-	rows, err := q.db.QueryContext(ctx, listItem)
+func (q *Queries) ListItems(ctx context.Context) ([]Item, error) {
+	rows, err := q.db.QueryContext(ctx, listItems)
 	if err != nil {
 		return nil, err
 	}

@@ -1,4 +1,4 @@
--- name: ListItem :many
+-- name: ListItems :many
 select * from items order by code;
 
 -- name: GetItemById :one

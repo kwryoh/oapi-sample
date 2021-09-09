@@ -18,21 +18,19 @@ func main() {
 		log.Fatal("Cannot connect database: ", err)
 		os.Exit(-1)
 	}
+	defer conn.Close()
 
 	swagger, err := api.GetSwagger()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error loading swagger spec¥n: %s", err)
 		os.Exit(1)
 	}
-
 	swagger.Servers = nil
 
 	itemStore := NewItemStore()
 
 	r := chi.NewRouter()
-
 	r.Use(middleware.OapiRequestValidator(swagger))
-
 	api.HandlerFromMux(itemStore, r)
 
 	addr := os.Getenv("Addr")

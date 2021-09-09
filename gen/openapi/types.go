@@ -55,8 +55,8 @@ type ItemId Id
 // Limit defines model for limit.
 type Limit int
 
-// Offset defines model for offset.
-type Offset int
+// Page defines model for page.
+type Page int
 
 // 商品モデル
 type ResponseItem Item
@@ -68,11 +68,11 @@ type ResponseItems struct {
 
 // GetItemsParams defines parameters for GetItems.
 type GetItemsParams struct {
-	// 上限
+	// ページ数
 	Limit *Limit `json:"limit,omitempty"`
 
-	// スタートページ
-	Offset *Offset `json:"offset,omitempty"`
+	// 閲覧ページ
+	Page *Page `json:"page,omitempty"`
 }
 
 // PostItemsJSONBody defines parameters for PostItems.

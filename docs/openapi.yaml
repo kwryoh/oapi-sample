@@ -24,7 +24,7 @@ paths:
           $ref: '#/components/responses/ResponseItems'
       parameters:
         - $ref: '#/components/parameters/limit'
-        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/page'
     post:
       summary: PostItems
       operationId: PostItems
@@ -170,14 +170,16 @@ components:
       required: false
       schema:
         type: integer
-      description: 上限
-    offset:
-      name: offset
+        default: 10
+      description: ページ数
+    page:
+      name: page
       in: query
       required: false
       schema:
         type: integer
-      description: スタートページ
+        default: 1
+      description: 閲覧ページ
   responses:
     ResponseItems:
       description: Example response

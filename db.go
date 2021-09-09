@@ -21,20 +21,18 @@ const (
 )
 
 var (
+	conn    *sql.DB
 	queries *db.Queries
 	ctx     context.Context
 )
 
 func ConnectDB() error {
 	source := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", user, password, host, port, dbname)
-	log.Printf("db: %s", source)
-	conn, err := sql.Open(driver, source)
-	if err != nil {
-		return err
-	}
-	defer conn.Close()
+	log.Printf("source: %s", source)
 
-	if err := conn.Ping(); err != nil {
+	var err error
+	conn, err = sql.Open(driver, source)
+	if err != nil {
 		return err
 	}
 

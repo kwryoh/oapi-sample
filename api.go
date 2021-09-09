@@ -29,7 +29,8 @@ func NewItemStore() *ItemStore {
 
 func (i *ItemStore) GetItems(w http.ResponseWriter, r *http.Request, params openapi.GetItemsParams) {
 	var items []db.Item
-	items, err := queries.ListItem(ctx)
+
+	items, err := queries.ListItems(ctx)
 	if err != nil {
 		log.Fatal("Cannot retrieve items: ", err)
 	}
