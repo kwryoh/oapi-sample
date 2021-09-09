@@ -8,11 +8,8 @@ import (
 )
 
 const createItem = `-- name: CreateItem :one
-insert into items (
-    name, code, unit, cost
-) VALUES (
-    $1, $2, $3, $4
-)
+insert into items (name, code, unit, cost)
+VALUES ($1, $2, $3, $4)
 returning id, name, code, unit, cost, created_at, updated_at
 `
 
@@ -44,7 +41,8 @@ func (q *Queries) CreateItem(ctx context.Context, arg CreateItemParams) (Item, e
 }
 
 const deleteItem = `-- name: DeleteItem :exec
-delete from items where id = $1
+delete from items
+where id = $1
 `
 
 func (q *Queries) DeleteItem(ctx context.Context, id uint64) error {
@@ -53,7 +51,10 @@ func (q *Queries) DeleteItem(ctx context.Context, id uint64) error {
 }
 
 const getItemById = `-- name: GetItemById :one
-select id, name, code, unit, cost, created_at, updated_at from items where id = $1 limit 1
+select id, name, code, unit, cost, created_at, updated_at
+from items
+where id = $1
+limit 1
 `
 
 func (q *Queries) GetItemById(ctx context.Context, id uint64) (Item, error) {
@@ -72,11 +73,19 @@ func (q *Queries) GetItemById(ctx context.Context, id uint64) (Item, error) {
 }
 
 const listItems = `-- name: ListItems :many
-select id, name, code, unit, cost, created_at, updated_at from items order by code
+select id, name, code, unit, cost, created_at, updated_at
+from items
+order by code
+LIMIT $1 OFFSET $2
 `
 
-func (q *Queries) ListItems(ctx context.Context) ([]Item, error) {
-	rows, err := q.db.QueryContext(ctx, listItems)
+type ListItemsParams struct {
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
+}
+
+func (q *Queries) ListItems(ctx context.Context, arg ListItemsParams) ([]Item, error) {
+	rows, err := q.db.QueryContext(ctx, listItems, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
@@ -108,10 +117,10 @@ func (q *Queries) ListItems(ctx context.Context) ([]Item, error) {
 
 const updateItem = `-- name: UpdateItem :one
 update items
-set name = $2
-  , code = $3
-  , unit = $4
-  , cost = $5
+set name = $2,
+  code = $3,
+  unit = $4,
+  cost = $5
 where id = $1
 returning id, name, code, unit, cost, created_at, updated_at
 `

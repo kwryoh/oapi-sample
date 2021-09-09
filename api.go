@@ -28,9 +28,21 @@ func NewItemStore() *ItemStore {
 }
 
 func (i *ItemStore) GetItems(w http.ResponseWriter, r *http.Request, params openapi.GetItemsParams) {
-	var items []db.Item
+	var limit int32 = 10
+	if params.Limit != nil {
+		limit = int32(*params.Limit)
+	}
+	var page int32 = 1
+	if params.Page != nil {
+		page = int32(*params.Page)
+	}
 
-	items, err := queries.ListItems(ctx)
+	var arg db.ListItemsParams
+	arg.Offset = limit * (page - 1)
+	arg.Limit = limit
+
+	var items []db.Item
+	items, err := queries.ListItems(ctx, arg)
 	if err != nil {
 		log.Fatal("Cannot retrieve items: ", err)
 	}
@@ -42,15 +54,6 @@ func (i *ItemStore) GetItems(w http.ResponseWriter, r *http.Request, params open
 		j, _ := json.Marshal(dbitem)
 		if err := json.Unmarshal(j, &item); err != nil {
 			log.Fatal("cannot convert DB to RESTAPI: ", err)
-		}
-
-		result = append(result, item)
-
-		if params.Limit != nil {
-			l := int(*params.Limit)
-			if len(result) >= l {
-				break
-			}
 		}
 	}
 

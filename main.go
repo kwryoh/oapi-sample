@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/go-chi/chi/v5"
+	chi_middleware "github.com/go-chi/chi/v5/middleware"
 
 	middleware "github.com/deepmap/oapi-codegen/pkg/chi-middleware"
 
@@ -31,6 +32,8 @@ func main() {
 
 	r := chi.NewRouter()
 	r.Use(middleware.OapiRequestValidator(swagger))
+	r.Use(chi_middleware.RealIP)
+	r.Use(chi_middleware.Logger)
 	api.HandlerFromMux(itemStore, r)
 
 	addr := os.Getenv("Addr")
