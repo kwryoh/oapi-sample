@@ -9,12 +9,13 @@ import (
 	"github.com/go-chi/chi/v5"
 
 	middleware "github.com/deepmap/oapi-codegen/pkg/chi-middleware"
+
 	api "github.com/kwryoh/oapi-sample/gen/openapi"
 )
 
 func main() {
 	if err := ConnectDB(); err != nil {
-		log.Fatalf("Error connect database¥n: %s", err)
+		log.Fatal("Cannot connect database: ", err)
 		os.Exit(-1)
 	}
 

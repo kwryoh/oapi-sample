@@ -2,11 +2,13 @@ package main
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"sync"
 	"time"
 
 	"github.com/go-chi/render"
+	"github.com/kwryoh/oapi-sample/gen/db"
 	"github.com/kwryoh/oapi-sample/gen/openapi"
 )
 
@@ -26,12 +28,21 @@ func NewItemStore() *ItemStore {
 }
 
 func (i *ItemStore) GetItems(w http.ResponseWriter, r *http.Request, params openapi.GetItemsParams) {
-	i.Lock.Lock()
-	defer i.Lock.Unlock()
+	var items []db.Item
+	items, err := queries.ListItem(ctx)
+	if err != nil {
+		log.Fatal("Cannot retrieve items: ", err)
+	}
 
 	var result []openapi.Item
+	for _, dbitem := range items {
+		var item openapi.Item
 
-	for _, item := range i.Items {
+		j, _ := json.Marshal(dbitem)
+		if err := json.Unmarshal(j, &item); err != nil {
+			log.Fatal("cannot convert DB to RESTAPI: ", err)
+		}
+
 		result = append(result, item)
 
 		if params.Limit != nil {
