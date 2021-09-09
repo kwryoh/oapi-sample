@@ -7,16 +7,7 @@ import (
 	"context"
 )
 
-const deleteItemById = `-- name: DeleteItemById :exec
-delete from items where id = $1
-`
-
-func (q *Queries) DeleteItemById(ctx context.Context, id uint64) error {
-	_, err := q.db.ExecContext(ctx, deleteItemById, id)
-	return err
-}
-
-const insertItem = `-- name: InsertItem :one
+const createItem = `-- name: CreateItem :one
 insert into items (
     name, code, unit, cost
 ) VALUES (
@@ -25,15 +16,15 @@ insert into items (
 returning id, name, code, unit, cost, created_at, updated_at
 `
 
-type InsertItemParams struct {
+type CreateItemParams struct {
 	Name string `json:"name"`
 	Code string `json:"code"`
 	Unit string `json:"unit"`
 	Cost string `json:"cost"`
 }
 
-func (q *Queries) InsertItem(ctx context.Context, arg InsertItemParams) (Item, error) {
-	row := q.db.QueryRowContext(ctx, insertItem,
+func (q *Queries) CreateItem(ctx context.Context, arg CreateItemParams) (Item, error) {
+	row := q.db.QueryRowContext(ctx, createItem,
 		arg.Name,
 		arg.Code,
 		arg.Unit,
@@ -52,12 +43,21 @@ func (q *Queries) InsertItem(ctx context.Context, arg InsertItemParams) (Item, e
 	return i, err
 }
 
-const selectItemById = `-- name: SelectItemById :one
+const deleteItem = `-- name: DeleteItem :exec
+delete from items where id = $1
+`
+
+func (q *Queries) DeleteItem(ctx context.Context, id uint64) error {
+	_, err := q.db.ExecContext(ctx, deleteItem, id)
+	return err
+}
+
+const getItemById = `-- name: GetItemById :one
 select id, name, code, unit, cost, created_at, updated_at from items where id = $1 limit 1
 `
 
-func (q *Queries) SelectItemById(ctx context.Context, id uint64) (Item, error) {
-	row := q.db.QueryRowContext(ctx, selectItemById, id)
+func (q *Queries) GetItemById(ctx context.Context, id uint64) (Item, error) {
+	row := q.db.QueryRowContext(ctx, getItemById, id)
 	var i Item
 	err := row.Scan(
 		&i.ID,
@@ -71,12 +71,12 @@ func (q *Queries) SelectItemById(ctx context.Context, id uint64) (Item, error) {
 	return i, err
 }
 
-const selectItems = `-- name: SelectItems :many
+const listItem = `-- name: ListItem :many
 select id, name, code, unit, cost, created_at, updated_at from items order by code
 `
 
-func (q *Queries) SelectItems(ctx context.Context) ([]Item, error) {
-	rows, err := q.db.QueryContext(ctx, selectItems)
+func (q *Queries) ListItem(ctx context.Context) ([]Item, error) {
+	rows, err := q.db.QueryContext(ctx, listItem)
 	if err != nil {
 		return nil, err
 	}
@@ -106,7 +106,7 @@ func (q *Queries) SelectItems(ctx context.Context) ([]Item, error) {
 	return items, nil
 }
 
-const updateItemById = `-- name: UpdateItemById :one
+const updateItem = `-- name: UpdateItem :one
 update items
 set name = $2
   , code = $3
@@ -116,7 +116,7 @@ where id = $1
 returning id, name, code, unit, cost, created_at, updated_at
 `
 
-type UpdateItemByIdParams struct {
+type UpdateItemParams struct {
 	ID   uint64 `json:"id"`
 	Name string `json:"name"`
 	Code string `json:"code"`
@@ -124,8 +124,8 @@ type UpdateItemByIdParams struct {
 	Cost string `json:"cost"`
 }
 
-func (q *Queries) UpdateItemById(ctx context.Context, arg UpdateItemByIdParams) (Item, error) {
-	row := q.db.QueryRowContext(ctx, updateItemById,
+func (q *Queries) UpdateItem(ctx context.Context, arg UpdateItemParams) (Item, error) {
+	row := q.db.QueryRowContext(ctx, updateItem,
 		arg.ID,
 		arg.Name,
 		arg.Code,
