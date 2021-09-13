@@ -80,4 +80,3 @@ type PostItemsJSONBody RequestItem
 
 // PostItemsJSONRequestBody defines body for PostItems for application/json ContentType.
 type PostItemsJSONRequestBody PostItemsJSONBody
-

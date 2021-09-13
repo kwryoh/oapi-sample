@@ -1,0 +1,6 @@
+output:
+  gen/openapi/server.go
+generate:
+  - chi-server
+  - spec
+package: openapi
