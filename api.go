@@ -1,7 +1,8 @@
-//go:generate go run github.com/deepmap/oapi-codegen/cmd/oapi-codegen --config=types.cfg.yaml docs/openapi.yaml
-//go:generate go run github.com/deepmap/oapi-codegen/cmd/oapi-codegen --config=server.cfg.yaml docs/openapi.yaml
 package app
 
+//go:generate go install github.com/deepmap/oapi-codegen/cmd/oapi-codegen@v1.8.2
+//go:generate oapi-codegen --config=types.cfg.yaml docs/openapi.yaml
+//go:generate oapi-codegen --config=server.cfg.yaml docs/openapi.yaml
 import (
 	"context"
 	"encoding/json"

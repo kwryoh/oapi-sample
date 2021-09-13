@@ -1,5 +1,7 @@
 package app
 
+//go:generate go install github.com/kyleconroy/sqlc/cmd/sqlc@latest
+//go:generate sqlc generate -f sqlc.yaml
 import (
 	"database/sql"
 	"fmt"
