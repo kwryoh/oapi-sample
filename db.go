@@ -1,7 +1,6 @@
-package main
+package app
 
 import (
-	"context"
 	"database/sql"
 	"fmt"
 	"log"
@@ -20,25 +19,19 @@ const (
 	dbname   = "example"
 )
 
-var (
-	conn    *sql.DB
-	queries *db.Queries
-	ctx     context.Context
-)
-
-func ConnectDB() error {
+func ConnectDB(conn *sql.DB) (*db.Queries, error) {
+	var queries *db.Queries
 	source := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", user, password, host, port, dbname)
 	log.Printf("source: %s", source)
 
 	var err error
 	conn, err = sql.Open(driver, source)
 	if err != nil {
-		return err
+		return queries, err
 	}
 
 	log.Printf("Successfully connected.")
-	ctx = context.Background()
 	queries = db.New(conn)
 
-	return nil
+	return queries, nil
 }

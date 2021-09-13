@@ -1,12 +1,12 @@
-package main
+package app
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"strconv"
-	"sync"
 
 	"github.com/go-chi/render"
 	"github.com/kwryoh/oapi-sample/gen/db"
@@ -14,17 +14,16 @@ import (
 )
 
 type ItemStore struct {
-	Items  map[openapi.Id]openapi.Item
-	NextId openapi.Id
-	Lock   sync.Mutex
+	queries *db.Queries
+	ctx     context.Context
 }
 
 var _ openapi.ServerInterface = (*ItemStore)(nil)
 
-func NewItemStore() *ItemStore {
+func NewItemStore(queries *db.Queries, ctx context.Context) *ItemStore {
 	return &ItemStore{
-		Items:  make(map[openapi.Id]openapi.Item),
-		NextId: 1000,
+		queries: queries,
+		ctx:     ctx,
 	}
 }
 
@@ -45,7 +44,7 @@ func (i *ItemStore) GetItems(w http.ResponseWriter, r *http.Request, params open
 	arg.Limit = limit
 
 	var items []db.Item
-	items, err := queries.ListItems(ctx, arg)
+	items, err := i.queries.ListItems(i.ctx, arg)
 	if err != nil {
 		log.Print("Cannot retrieve items: ", err)
 	}
@@ -87,7 +86,7 @@ func (i *ItemStore) PostItems(w http.ResponseWriter, r *http.Request) {
 		Cost: fmt.Sprintf("%g", reqItem.Cost),
 	}
 
-	dbItem, err := queries.CreateItem(ctx, params)
+	dbItem, err := i.queries.CreateItem(i.ctx, params)
 	if err != nil {
 		log.Fatal("Could not insert item ", err)
 	}

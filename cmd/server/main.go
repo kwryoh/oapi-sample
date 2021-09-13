@@ -1,6 +1,8 @@
 package main
 
 import (
+	"context"
+	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
@@ -10,12 +12,14 @@ import (
 	chi_middleware "github.com/go-chi/chi/v5/middleware"
 
 	middleware "github.com/deepmap/oapi-codegen/pkg/chi-middleware"
-
+	app "github.com/kwryoh/oapi-sample"
 	api "github.com/kwryoh/oapi-sample/gen/openapi"
 )
 
 func main() {
-	if err := ConnectDB(); err != nil {
+	var conn *sql.DB
+	queries, err := app.ConnectDB(conn)
+	if err != nil {
 		log.Fatal("Cannot connect database: ", err)
 		os.Exit(-1)
 	}
@@ -28,7 +32,8 @@ func main() {
 	}
 	swagger.Servers = nil
 
-	itemStore := NewItemStore()
+	ctx := context.Background()
+	itemStore := app.NewItemStore(queries, ctx)
 
 	r := chi.NewRouter()
 	r.Use(middleware.OapiRequestValidator(swagger))
