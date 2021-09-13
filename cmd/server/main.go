@@ -17,8 +17,8 @@ import (
 )
 
 func main() {
-	var conn *sql.DB
-	queries, err := app.ConnectDB(conn)
+	var conn sql.DB
+	queries, err := app.ConnectDB(&conn)
 	if err != nil {
 		log.Fatal("Cannot connect database: ", err)
 		os.Exit(-1)
