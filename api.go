@@ -6,10 +6,8 @@ package app
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
-	"strconv"
 
 	"github.com/go-chi/render"
 	"github.com/kwryoh/oapi-sample/gen/db"
@@ -33,44 +31,22 @@ func NewItemStore(queries *db.Queries, ctx context.Context) *ItemStore {
 func (i *ItemStore) GetItems(w http.ResponseWriter, r *http.Request, params openapi.GetItemsParams) {
 	var result openapi.ResponseItems
 
-	var limit int32 = 10
-	if params.Limit != nil {
-		limit = int32(*params.Limit)
-	}
-	var page int32 = 1
-	if params.Page != nil {
-		page = int32(*params.Page)
-	}
-
-	var arg db.ListItemsParams
-	arg.Offset = limit * (page - 1)
-	arg.Limit = limit
-
-	var items []db.Item
+	arg := params.ToDbParams()
 	items, err := i.queries.ListItems(i.ctx, arg)
 	if err != nil {
 		log.Print("Cannot retrieve items: ", err)
 	}
 
 	for _, dbitem := range items {
-		cost, err := strconv.ParseFloat(dbitem.Cost, 32)
+		item, err := openapi.NewItemFromDbItem(dbitem)
 		if err != nil {
-			cost = 0.0
-		}
-
-		item := openapi.Item{
-			Id:        openapi.Id(dbitem.ID),
-			Code:      dbitem.Code,
-			Name:      dbitem.Name,
-			Unit:      dbitem.Unit,
-			CreatedAt: dbitem.CreatedAt,
-			UpdatedAt: dbitem.UpdatedAt,
-			Cost:      float32(cost),
+			log.Fatal("Cannot convert item: ", err)
 		}
 
 		result.Items = append(result.Items, item)
 	}
 
+	w.WriteHeader(http.StatusOK)
 	render.JSON(w, r, result)
 }
 
@@ -82,33 +58,17 @@ func (i *ItemStore) PostItems(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	params := db.CreateItemParams{
-		Code: reqItem.Code,
-		Name: reqItem.Name,
-		Unit: reqItem.Unit,
-		Cost: fmt.Sprintf("%g", reqItem.Cost),
-	}
-
+	params := openapi.NewCreateItemParams(reqItem)
 	dbItem, err := i.queries.CreateItem(i.ctx, params)
 	if err != nil {
 		log.Fatal("Could not insert item ", err)
 	}
 
-	cost, err := strconv.ParseFloat(dbItem.Cost, 32)
-	if err != nil {
-		cost = 0.0
-	}
-	result := openapi.ResponseItem{
-		Id:        openapi.Id(dbItem.ID),
-		Code:      dbItem.Code,
-		Name:      dbItem.Name,
-		Unit:      dbItem.Unit,
-		Cost:      float32(cost),
-		CreatedAt: dbItem.CreatedAt,
-		UpdatedAt: dbItem.UpdatedAt,
-	}
+	item, _ := openapi.NewItemFromDbItem(dbItem)
+	resItem := openapi.ResponseItem(item)
+
 	w.WriteHeader(http.StatusCreated)
-	render.JSON(w, r, result)
+	render.JSON(w, r, resItem)
 }
 
 func (i *ItemStore) DeleteItemById(w http.ResponseWriter, r *http.Request, itemId openapi.ItemId) {

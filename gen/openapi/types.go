@@ -19,7 +19,7 @@ type Item struct {
 	Cost float32 `json:"cost"`
 
 	// 作成日時
-	CreatedAt time.Time `json:"createdAt"`
+	CreatedAt time.Time `json:"created_at"`
 
 	// 主キー型
 	Id Id `json:"id"`
@@ -31,7 +31,7 @@ type Item struct {
 	Unit string `json:"unit"`
 
 	// 更新日時
-	UpdatedAt time.Time `json:"updatedAt"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 // 商品登録時の商品情報

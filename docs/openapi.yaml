@@ -106,12 +106,12 @@ components:
           default: 0
           description: 原価
           format: float
-        createdAt:
+        created_at:
           type: string
           format: date-time
           description: 作成日時
           readOnly: true
-        updatedAt:
+        updated_at:
           type: string
           format: date-time
           description: 更新日時
@@ -122,8 +122,8 @@ components:
         - name
         - unit
         - cost
-        - createdAt
-        - updatedAt
+        - created_at
+        - updated_at
     RequestItem:
       title: RequestItem
       type: object
