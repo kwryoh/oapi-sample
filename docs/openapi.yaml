@@ -155,7 +155,12 @@ components:
       x-go-type: uint64
       format: int64
       readOnly: true
-  securitySchemes: {}
+  securitySchemes:
+    APIKey:
+      name: Secret
+      type: apiKey
+      in: header
+      description: ''
   parameters:
     item_id:
       name: item_id
@@ -205,3 +210,5 @@ components:
           examples: {}
 tags:
   - name: items
+security:
+  - APIKey: []
