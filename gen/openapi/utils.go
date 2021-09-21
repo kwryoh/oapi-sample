@@ -25,7 +25,7 @@ func NewItemFromDbItem(dbitem db.Item) (Item, error) {
 	return item, nil
 }
 
-func NewCreateItemParams(r RequestItem) db.CreateItemParams {
+func NewCreateItemParams(r GetItemsRequest) db.CreateItemParams {
 	result := db.CreateItemParams{
 		Code: r.Code,
 		Name: r.Name,

@@ -7,6 +7,25 @@ import (
 	"time"
 )
 
+const (
+	APIKeyScopes = "APIKey.Scopes"
+)
+
+// 商品登録時の商品情報
+type GetItemsRequest struct {
+	// 商品コード
+	Code string `json:"code"`
+
+	// 原価
+	Cost float32 `json:"cost"`
+
+	// 商品名
+	Name string `json:"name"`
+
+	// 単位
+	Unit string `json:"unit"`
+}
+
 // 主キー型
 type Id uint64
 
@@ -34,21 +53,6 @@ type Item struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
-// 商品登録時の商品情報
-type RequestItem struct {
-	// 商品コード
-	Code string `json:"code"`
-
-	// 原価
-	Cost float32 `json:"cost"`
-
-	// 商品名
-	Name string `json:"name"`
-
-	// 単位
-	Unit string `json:"unit"`
-}
-
 // 主キー型
 type ItemId Id
 
@@ -58,11 +62,20 @@ type Limit int
 // Page defines model for page.
 type Page int
 
-// 商品モデル
-type ResponseItem Item
+// ErrorResponse defines model for errorResponse.
+type ErrorResponse struct {
+	// HTTP status code
+	Code int64 `json:"code"`
 
-// ResponseItems defines model for ResponseItems.
-type ResponseItems struct {
+	// Error message
+	Message string `json:"message"`
+}
+
+// 商品モデル
+type GetItemResponse Item
+
+// GetItemsResponse defines model for getItemsResponse.
+type GetItemsResponse struct {
 	Items []Item `json:"items"`
 }
 
@@ -76,7 +89,7 @@ type GetItemsParams struct {
 }
 
 // PostItemsJSONBody defines parameters for PostItems.
-type PostItemsJSONBody RequestItem
+type PostItemsJSONBody GetItemsRequest
 
 // PostItemsJSONRequestBody defines body for PostItems for application/json ContentType.
 type PostItemsJSONRequestBody PostItemsJSONBody

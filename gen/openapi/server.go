@@ -6,6 +6,7 @@ package openapi
 import (
 	"bytes"
 	"compress/gzip"
+	"context"
 	"encoding/base64"
 	"fmt"
 	"net/http"
@@ -20,21 +21,21 @@ import (
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
-	// GetItems
+	// Get item list
 	// (GET /items)
 	GetItems(w http.ResponseWriter, r *http.Request, params GetItemsParams)
-	// PostItems
+	// Create Item
 	// (POST /items)
 	PostItems(w http.ResponseWriter, r *http.Request)
-	// DeleteItemById
+	// Delete item
 	// (DELETE /items/{item_id})
-	DeleteItemById(w http.ResponseWriter, r *http.Request, itemId ItemId)
+	DeleteItem(w http.ResponseWriter, r *http.Request, itemId ItemId)
 	// Get Item
 	// (GET /items/{item_id})
 	GetItemById(w http.ResponseWriter, r *http.Request, itemId ItemId)
-	// PatchItemById
+	// Update item
 	// (PATCH /items/{item_id})
-	PatchItemById(w http.ResponseWriter, r *http.Request, itemId ItemId)
+	PatchItem(w http.ResponseWriter, r *http.Request, itemId ItemId)
 }
 
 // ServerInterfaceWrapper converts contexts to parameters.
@@ -50,6 +51,8 @@ func (siw *ServerInterfaceWrapper) GetItems(w http.ResponseWriter, r *http.Reque
 	ctx := r.Context()
 
 	var err error
+
+	ctx = context.WithValue(ctx, APIKeyScopes, []string{""})
 
 	// Parameter object where we will unmarshal all parameters from the context
 	var params GetItemsParams
@@ -91,6 +94,8 @@ func (siw *ServerInterfaceWrapper) GetItems(w http.ResponseWriter, r *http.Reque
 func (siw *ServerInterfaceWrapper) PostItems(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
+	ctx = context.WithValue(ctx, APIKeyScopes, []string{""})
+
 	var handler = func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.PostItems(w, r)
 	}
@@ -102,8 +107,8 @@ func (siw *ServerInterfaceWrapper) PostItems(w http.ResponseWriter, r *http.Requ
 	handler(w, r.WithContext(ctx))
 }
 
-// DeleteItemById operation middleware
-func (siw *ServerInterfaceWrapper) DeleteItemById(w http.ResponseWriter, r *http.Request) {
+// DeleteItem operation middleware
+func (siw *ServerInterfaceWrapper) DeleteItem(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	var err error
@@ -117,8 +122,10 @@ func (siw *ServerInterfaceWrapper) DeleteItemById(w http.ResponseWriter, r *http
 		return
 	}
 
+	ctx = context.WithValue(ctx, APIKeyScopes, []string{""})
+
 	var handler = func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.DeleteItemById(w, r, itemId)
+		siw.Handler.DeleteItem(w, r, itemId)
 	}
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -143,6 +150,8 @@ func (siw *ServerInterfaceWrapper) GetItemById(w http.ResponseWriter, r *http.Re
 		return
 	}
 
+	ctx = context.WithValue(ctx, APIKeyScopes, []string{""})
+
 	var handler = func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.GetItemById(w, r, itemId)
 	}
@@ -154,8 +163,8 @@ func (siw *ServerInterfaceWrapper) GetItemById(w http.ResponseWriter, r *http.Re
 	handler(w, r.WithContext(ctx))
 }
 
-// PatchItemById operation middleware
-func (siw *ServerInterfaceWrapper) PatchItemById(w http.ResponseWriter, r *http.Request) {
+// PatchItem operation middleware
+func (siw *ServerInterfaceWrapper) PatchItem(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	var err error
@@ -169,8 +178,10 @@ func (siw *ServerInterfaceWrapper) PatchItemById(w http.ResponseWriter, r *http.
 		return
 	}
 
+	ctx = context.WithValue(ctx, APIKeyScopes, []string{""})
+
 	var handler = func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.PatchItemById(w, r, itemId)
+		siw.Handler.PatchItem(w, r, itemId)
 	}
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -224,13 +235,13 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 		r.Post(options.BaseURL+"/items", wrapper.PostItems)
 	})
 	r.Group(func(r chi.Router) {
-		r.Delete(options.BaseURL+"/items/{item_id}", wrapper.DeleteItemById)
+		r.Delete(options.BaseURL+"/items/{item_id}", wrapper.DeleteItem)
 	})
 	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/items/{item_id}", wrapper.GetItemById)
 	})
 	r.Group(func(r chi.Router) {
-		r.Patch(options.BaseURL+"/items/{item_id}", wrapper.PatchItemById)
+		r.Patch(options.BaseURL+"/items/{item_id}", wrapper.PatchItem)
 	})
 
 	return r
@@ -239,25 +250,31 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/8RXW2/cVBD+K6sBiQec2CkRUv1E2pRqhSBR4YloqU7s2V23to9zfNx2tfJDdsWlQKGi",
-	"akoAcROXB0RVCg+VevkzGy/kX6DxsXd9W9KkIF6iPZs5M998883M2SFY3Au4j74MwRxCwATzUKJIT45E",
-	"76Jj00cbQ0s4gXS4DyYkt99Lbu2210EDh84Bk33QwGcegjm7poHAncgRaIMpRYQahFYfPUb+nhfYBROe",
-	"0+fxdfXfUG/bEMcauI7nyHrsyfiLyfjRZPRgevteHn8nQjGYA1A3i+Fs7LLIlWCuGBrIQZDC9CX2UKSx",
-	"AtbDeqjDvft//fTzLOCCaOnd5mANsWJiJQy4H2LK8YXs0Jbo0dnivkQ/zZsFgetYjMDol0JCNHxaBslZ",
-	"Gquc0LlrzAtcbOUIINZKAMJjIQgED1BIB2diKX84GiFxwewN3x3kCsn4YkKwASiycgltZZ47Myu+fQkt",
-	"+XSJxnmFUmjtBlEfPHg4Gf06GT9Kvv4INOhy4TGpavfyKjRAdaRLKNqk9EqdNbi21ONL2beRchFrkFe5",
-	"qZ0m4+8n4/cn419Aq1BrcRsX3hr9TuocXwcNUGUNJpzdWD9nGCvkiUmJguzf2VpbertDf4yl050X56BD",
-	"KRy/R/AsHsqSgo0qsckn3xw8+a5IT9flTM6d+ZG3TULXwBLIJNoXWUMTHzz+avrBzemdH6f7o6Izm0lc",
-	"ko6HsFAac7RqMh01SfI+LWQFkW9j1/GRKtdEanLzRhM9kd80kJIbnx88brYP7IUMTL/8Y7p375kYqHYH",
-	"ZZNKJUs5A5yVtVSQErZOQcukz2p/kZgzaZEcYzpL1gsLLZnOkZ0IQ/lPCv9z/+Hhx/en+6PJ7l31zXT8",
-	"bvLtbycW/AnFfUJBz3X0HymmUtDFtSxUrEh742B0/C7PxzqzUjToMccFEy6zq8wRA95/pUffLFvcm6+1",
-	"CwPeb71GFhRckH1fyiA0db3nyH60Teb65at0H2oDuC1fCFuhGsJrm+3WOrcij7YK7XULaSSbwzzU6+23",
-	"yEOe0pvqGkmrtRGgv7bZBg2uoAiV75Vlg8x5gD4LHDDhpWVj2VBy6Kf60Wc7qIdyUcmU9iajz5JP95In",
-	"dyD1KNJlR+sBzqNUO1ErPYu2mkfO3ERXz49YO9IwfTnEncqL4JRhLJprMzu9vLXT7RZ5HhODMvB6mwbN",
-	"XVBkZPeuatQaI5s8nHkWSndnuD34154tRS3H9afSKWPleMRUeCnCrxITa5lo9GH2fI0VSy5KPFpB1NC3",
-	"kusfHu7/UGNtPfVBgc8M2upVXEpqte7+Dd46mxEaa7DabCJbr/LItytJ1qLVJfDsPdGciHHc6hwztfMo",
-	"W/mcq+v6WC2a/0Sh5guYtPpHEqL2db0l6PL/R0k1fE3WZI3iSk7LfI6buu5yi7l9HkrztGEYKRfZ/WHx",
-	"p1wIcSf+OwAA///PvJbRKQ4AAA==",
+	"H4sIAAAAAAAC/7xYW2/URhT+K9a0Uh/wxt5kQYqfGgi0K0QTQfrSaIsm9snuwPqSmXHIKvIDWfVCW1pU",
+	"BDRt1Zt6eaiKKO0DEpc/s9lt+RfVXLz2rm02Cag8oNieOZfvO+ebM7uL3NCPwgACzpCziyJMsQ8cqHwi",
+	"HPzLxBN/esBcSiJOwgA5aHjnw+Ht681lZCIiniPMO8hEAfYBOeNtJqKwFRMKHnI4jcFEzO2Aj4W91yls",
+	"Ige9ZmX+LfWVWcRDSWKiLvEJL/oe9L8e9J8M9h6N7jxI/W/FQHtZAGpn3p0HmzjucuTUbRPxXiTDDDi0",
+	"gUpfEW5D0dXzuw///fW3scMKb3JvubMSX4lAhUVhwEBiDJSG9KJ+I164YcAhkInjKOoSF4torCtMhLSL",
+	"YAf7UVftLfu+jbuxtuMBchr2gol8YEwmiM6FdIN4HgQqkizmiIYRUE6UYbV3Go6319ZWDcYxj5khV5hp",
+	"NNoP7LjdmJFtuIB3iB/7Ke2bIfUxVzCcaiAT+en3U7ZtIp8E6qkhnihgbyXo9tLN0wjm0pkO8KzA0kg/",
+	"56LL5V3pgHFKgjZSBKVlu450oqnR1nh9uHEFXK5wnAxDUmqkLBse5liE3Qbe5OAfgetDtgsHvyyMt86u",
+	"GfIjsxzdkuOgcvGwYwU0WS/Sy8QfswOuJAJTinsFHpTlw8CfyzuX77jaZXhZ7lsxMF6lcP/sP37+2cPR",
+	"/t7g+n31ZtT/YPjDn8g8VMOoLYO9v4R+9G+IXZhzoOLb++tLtfda4j+7ttg6gQp1aCI3LI3s8+8Pnv2I",
+	"cl212Q0xzwwEsb+hGkUJVHlUw1s3y3zGQZnmDm9+dfC0ZH15r0i32pTOQvBGuGzFKGST2BcoNVF65mgd",
+	"tacpPnj0eLD3x6D/ZPjdp/k+r9tCQYpykwpMmbzosJoeKmiNiXZqh9RbW2CxU2uHNW0jVs5FMqLcq2qj",
+	"/9Og/9Gg//uxKyrTuDMry2dtu378KqtCu7rixjougM/+TSJeKEuXAubgXcYllXbw9NvRx7dG934Z7e9N",
+	"ZDdvz9drdr22UF+bX3BOLjonF0/Yi45t5+PyMIcaJ7L8Zsh8WmSzBpF8F2mAUBx4sEkCECVT3VtZ7KLc",
+	"DUXNURsuM7LFe6X7I68SzNE3f4/uPvgfwJzWak/2fZUYTFTARAY5mZBdMy0NR2jItINybaEq3Z4swBdi",
+	"IUpEaYqe9fLMK+Y0L3kaXmAySdTcBW5MCe9dEoWmUllabZ6HnjxDBXUdwJ5UIO34ErgUclqJIyKWS2sk",
+	"2AzTwxu7sg7Ax6SLHHQVX8OE9sLOm23xZs4N/czmxV7YMc6LFSIBKtZ3OI+YY1ltwjvxhlhuXb0m9qPC",
+	"MdvkbzCDSS6MpdWmsRy6sS9mBzG5u6AHCu3qQnNNWEjJvaS2CY6NlQiCpdUmMtE2UKZs1+dssTyMIMAR",
+	"QQ5amLPnbKVsHQmXNZ402lB5fKvDerD35fCLu8Nn95C0SGW5ND0xKegpQBrOLj7r5aqQLbHUBSMxZy6U",
+	"d4OkNTXzz9t2lfSM11mF8UwWTuz7mPZU7Aq/LlFnKG6zdE5CLXGlCdksYK7fVwNOAZjV9IzWdzhg/HTo",
+	"9Y54PdnQW6Y7srl2wZ7qSF0mWk/GvTXWl+Swd8fpwa5kPtRDnRrkkgI19SJoZ5ReiMUNe2E2dZN3usRE",
+	"Jw9D+NSuCbZVBEZTi+Ik14mp28Ha1XN+onLoAofZvSGOmtvDG5883/+5UAjL0oZ2OwVUo2j6ndA4o+tD",
+	"YtV4uayVd4OUZm2+gs4/3Wt66CWaM89xoxwQbpwL48Ar6d5mRVpHk6L0xxYhMhHmbmcmJGoqKPa82FzO",
+	"tF20uXL+lTD8rjw2KxjOn5QSivSMXG+JbBnQ7RSk7PRyLKsburjbCRl3Fm1x5rbGlnfzP1GhpJX8FwAA",
+	"///f5cI/ABMAAA==",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

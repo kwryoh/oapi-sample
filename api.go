@@ -29,7 +29,7 @@ func NewItemStore(queries *db.Queries, ctx context.Context) *ItemStore {
 }
 
 func (i *ItemStore) GetItems(w http.ResponseWriter, r *http.Request, params openapi.GetItemsParams) {
-	var result openapi.ResponseItems
+	var result openapi.GetItemsResponse
 
 	arg := params.ToDbParams()
 	items, err := i.queries.ListItems(i.ctx, arg)
@@ -51,7 +51,7 @@ func (i *ItemStore) GetItems(w http.ResponseWriter, r *http.Request, params open
 }
 
 func (i *ItemStore) PostItems(w http.ResponseWriter, r *http.Request) {
-	var reqItem openapi.RequestItem
+	var reqItem openapi.GetItemsRequest
 	if err := json.NewDecoder(r.Body).Decode(&reqItem); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		render.JSON(w, r, "Invalid format for PostItem")
@@ -65,13 +65,13 @@ func (i *ItemStore) PostItems(w http.ResponseWriter, r *http.Request) {
 	}
 
 	item, _ := openapi.NewItemFromDbItem(dbItem)
-	resItem := openapi.ResponseItem(item)
+	resItem := openapi.GetItemResponse(item)
 
 	w.WriteHeader(http.StatusCreated)
 	render.JSON(w, r, resItem)
 }
 
-func (i *ItemStore) DeleteItemById(w http.ResponseWriter, r *http.Request, itemId openapi.ItemId) {
+func (i *ItemStore) DeleteItem(w http.ResponseWriter, r *http.Request, itemId openapi.ItemId) {
 	var result openapi.Item
 
 	render.JSON(w, r, result)
@@ -83,7 +83,7 @@ func (i *ItemStore) GetItemById(w http.ResponseWriter, r *http.Request, itemId o
 	render.JSON(w, r, result)
 }
 
-func (i *ItemStore) PatchItemById(w http.ResponseWriter, r *http.Request, itemId openapi.ItemId) {
+func (i *ItemStore) PatchItem(w http.ResponseWriter, r *http.Request, itemId openapi.ItemId) {
 	var result openapi.Item
 
 	render.JSON(w, r, result)
