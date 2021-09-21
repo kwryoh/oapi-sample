@@ -14,81 +14,99 @@ servers:
 paths:
   /items:
     get:
-      summary: GetItems
-      tags:
-        - items
-      operationId: GetItems
+      summary: Get item list
+      operationId: getItems
       description: 商品情報を取得
       responses:
         '200':
-          $ref: '#/components/responses/ResponseItems'
+          $ref: '#/components/responses/getItemsResponse'
       parameters:
         - $ref: '#/components/parameters/limit'
         - $ref: '#/components/parameters/page'
+      tags:
+        - item
     post:
-      summary: PostItems
-      operationId: PostItems
-      responses:
-        '201':
-          $ref: '#/components/responses/ResponseItem'
+      summary: Create Item
+      operationId: postItems
       description: 商品情報の登録
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RequestItem'
-        description: ''
+              $ref: '#/components/schemas/getItemsRequest'
+            examples:
+              body:
+                value:
+                  code: ITM0001
+                  name: string
+                  unit: string
+                  cost: 0
+        description: 登録情報
       tags:
-        - items
+        - item
+      responses:
+        '201':
+          description: Created
+        '403':
+          $ref: '#/components/responses/errorResponse'
+        '500':
+          $ref: '#/components/responses/errorResponse'
     parameters: []
   '/items/{item_id}':
     parameters:
       - $ref: '#/components/parameters/item_id'
     get:
       summary: Get Item
-      tags:
-        - items
       responses:
         '200':
-          $ref: '#/components/responses/ResponseItem'
+          $ref: '#/components/responses/getItemResponse'
         '404':
           description: Not Found
-      operationId: GetItemById
+      operationId: getItemById
       description: 商品情報を取得
+      tags:
+        - item
     delete:
-      summary: DeleteItemById
-      operationId: DeleteItemById
+      summary: Delete item
+      operationId: deleteItem
       responses:
         '204':
           description: No Content
         '404':
-          description: Not Found
-      tags:
-        - items
+          $ref: '#/components/responses/errorResponse'
       description: 商品情報を単体削除
+      tags:
+        - item
     patch:
-      summary: PatchItemById
-      operationId: PatchItemById
+      summary: Update item
+      operationId: patchItem
       responses:
         '200':
-          $ref: '#/components/responses/ResponseItem'
+          description: OK
         '404':
-          description: Not Found
+          $ref: '#/components/responses/errorResponse'
       description: 商品情報を更新
       tags:
-        - items
+        - item
 components:
   schemas:
-    Item:
-      title: Item
+    item:
+      title: item
       type: object
       description: 商品モデル
-      x-tags:
-        - items
-      x-examples: {}
+      x-examples:
+        application/json:
+          value:
+            id: 1000
+            code: CODE001
+            name: undefined
+            unit: qty
+            cost: 0
+            created_at: '2021-01-31T23:59:59+09:00'
+            updated_at: '2021-01-31T23:59:59+09:00'
       properties:
         id:
-          $ref: '#/components/schemas/Id'
+          $ref: '#/components/schemas/id'
         code:
           type: string
           pattern: '^[A-Z][A-Z0-9]+'
@@ -98,23 +116,29 @@ components:
           type: string
           default: undefined
           description: 商品名
+          example: Item 001
         unit:
           type: string
           description: 単位
+          example: qty
         cost:
           type: number
           default: 0
           description: 原価
           format: float
+          minimum: 0
+          maximum: 10000000000000
         created_at:
           type: string
           format: date-time
           description: 作成日時
+          example: '2021-01-31T23:59:59+09:00'
           readOnly: true
         updated_at:
           type: string
           format: date-time
           description: 更新日時
+          example: '2021-01-31T23:59:59+09:00'
           readOnly: true
       required:
         - id
@@ -124,8 +148,8 @@ components:
         - cost
         - created_at
         - updated_at
-    RequestItem:
-      title: RequestItem
+    getItemsRequest:
+      title: postItemsRequest
       type: object
       description: 商品登録時の商品情報
       properties:
@@ -148,13 +172,19 @@ components:
         - name
         - unit
         - cost
-    Id:
+    id:
       type: integer
       title: Id
       description: 主キー型
       x-go-type: uint64
       format: int64
+      example: 1000
+      minimum: 0
+      default: 0
       readOnly: true
+      x-examples:
+        application/json:
+          value: 0
   securitySchemes:
     APIKey:
       name: Secret
@@ -167,7 +197,7 @@ components:
       in: path
       required: true
       schema:
-        $ref: '#/components/schemas/Id'
+        $ref: '#/components/schemas/id'
       description: 商品ID
     limit:
       name: limit
@@ -186,8 +216,8 @@ components:
         default: 1
       description: 閲覧ページ
   responses:
-    ResponseItems:
-      description: Example response
+    getItemsResponse:
+      description: GET /items/ response
       content:
         application/json:
           schema:
@@ -196,19 +226,48 @@ components:
               items:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Item'
+                  $ref: '#/components/schemas/item'
                 readOnly: true
             required:
               - items
           examples: {}
-    ResponseItem:
-      description: Example response
+    getItemResponse:
+      description: 'GET /items/:item_id response'
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Item'
+            $ref: '#/components/schemas/item'
           examples: {}
-tags:
-  - name: items
+    errorResponse:
+      description: error response data
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                description: HTTP status code
+                format: int64
+                example: 403
+                minimum: 400
+                maximum: 600
+                exclusiveMaximum: true
+                readOnly: true
+              message:
+                type: string
+                description: Error message
+                example: Forbidden
+                readOnly: true
+            required:
+              - code
+              - message
+          examples:
+            application/json:
+              value:
+                code: 403
+                message: Forbidden
 security:
   - APIKey: []
+tags:
+  - name: item
