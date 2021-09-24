@@ -7,10 +7,6 @@ import (
 	"time"
 )
 
-const (
-	APIKeyScopes = "APIKey.Scopes"
-)
-
 // 主キー型
 type Id uint64
 

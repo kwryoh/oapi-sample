@@ -279,7 +279,5 @@ components:
               - value
           examples: {}
       description: 商品データ更新時のリクエストボディ
-security:
-  - APIKey: []
 tags:
   - name: item
