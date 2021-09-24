@@ -25,12 +25,12 @@ func NewItemFromDbItem(dbitem db.Item) (Item, error) {
 	return item, nil
 }
 
-func NewCreateItemParams(r GetItemsRequest) db.CreateItemParams {
+func NewCreateItemParams(r PostItemsRequest) db.CreateItemParams {
 	result := db.CreateItemParams{
-		Code: r.Code,
-		Name: r.Name,
-		Unit: r.Unit,
-		Cost: strconv.FormatFloat(float64(r.Cost), 'f', -1, 32),
+		Code: r.Value.Code,
+		Name: r.Value.Name,
+		Unit: r.Value.Unit,
+		Cost: strconv.FormatFloat(float64(r.Value.Cost), 'f', -1, 32),
 	}
 
 	return result

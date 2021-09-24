@@ -51,7 +51,7 @@ func (i *ItemStore) GetItems(w http.ResponseWriter, r *http.Request, params open
 }
 
 func (i *ItemStore) PostItems(w http.ResponseWriter, r *http.Request) {
-	var reqItem openapi.GetItemsRequest
+	var reqItem openapi.PostItemsRequest
 	if err := json.NewDecoder(r.Body).Decode(&reqItem); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		render.JSON(w, r, "Invalid format for PostItem")

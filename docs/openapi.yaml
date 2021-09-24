@@ -248,27 +248,21 @@ components:
                   code:
                     type: string
                     pattern: '^[A-Z][A-Z0-9]+'
-                    description: 商品コード
-                    example: ITM0001
+                    example: ITM001
                   name:
                     type: string
-                    description: 商品名
                     example: item 0001
                   unit:
                     type: string
-                    description: 単位
                     example: qty
                   cost:
                     type: number
                     format: float
-                    description: 原価
                     example: 1.5
-            required:
-              - value
           examples:
             body:
               value:
-                code: ITM0001
+                code: ITM001
                 name: item 0001
                 unit: qty
                 cost: 1.5
@@ -283,16 +277,7 @@ components:
                 $ref: '#/components/schemas/item'
             required:
               - value
-          examples:
-            body:
-              value:
-                id: 1000
-                code: CODE001
-                name: Item 001
-                unit: qty
-                cost: 0
-                created_at: '2021-01-31T23:59:59+09:00'
-                updated_at: '2021-01-31T23:59:59+09:00'
+          examples: {}
       description: 商品データ更新時のリクエストボディ
 security:
   - APIKey: []

@@ -11,21 +11,6 @@ const (
 	APIKeyScopes = "APIKey.Scopes"
 )
 
-// 商品登録時の商品情報
-type GetItemsRequest struct {
-	// 商品コード
-	Code string `json:"code"`
-
-	// 原価
-	Cost float32 `json:"cost"`
-
-	// 商品名
-	Name string `json:"name"`
-
-	// 単位
-	Unit string `json:"unit"`
-}
-
 // 主キー型
 type Id uint64
 
@@ -79,6 +64,22 @@ type GetItemsResponse struct {
 	Items []Item `json:"items"`
 }
 
+// PatchItemRequest defines model for patchItemRequest.
+type PatchItemRequest struct {
+	// 商品モデル
+	Value Item `json:"value"`
+}
+
+// 商品登録時の商品情報
+type PostItemsRequest struct {
+	Value *struct {
+		Code string  `json:"code"`
+		Cost float32 `json:"cost"`
+		Name string  `json:"name"`
+		Unit string  `json:"unit"`
+	} `json:"value,omitempty"`
+}
+
 // GetItemsParams defines parameters for GetItems.
 type GetItemsParams struct {
 	// ページ数
@@ -88,8 +89,8 @@ type GetItemsParams struct {
 	Page *Page `json:"page,omitempty"`
 }
 
-// PostItemsJSONBody defines parameters for PostItems.
-type PostItemsJSONBody GetItemsRequest
-
 // PostItemsJSONRequestBody defines body for PostItems for application/json ContentType.
-type PostItemsJSONRequestBody PostItemsJSONBody
+type PostItemsJSONRequestBody PostItemsRequest
+
+// PatchItemJSONRequestBody defines body for PatchItem for application/json ContentType.
+type PatchItemJSONRequestBody PatchItemRequest
