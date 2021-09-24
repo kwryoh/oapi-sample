@@ -185,12 +185,7 @@ components:
       x-examples:
         application/json:
           value: 0
-  securitySchemes:
-    APIKey:
-      name: Secret
-      type: apiKey
-      in: header
-      description: ''
+  securitySchemes: {}
   parameters:
     item_id:
       name: item_id
