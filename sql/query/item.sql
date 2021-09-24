@@ -3,7 +3,7 @@ select *
 from items
 order by code
 LIMIT $1 OFFSET $2;
--- name: GetItemById :one
+-- name: FindItemById :one
 select *
 from items
 where id = $1

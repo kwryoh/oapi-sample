@@ -50,15 +50,15 @@ func (q *Queries) DeleteItem(ctx context.Context, id uint64) error {
 	return err
 }
 
-const getItemById = `-- name: GetItemById :one
+const findItemById = `-- name: FindItemById :one
 select id, name, code, unit, cost, created_at, updated_at
 from items
 where id = $1
 limit 1
 `
 
-func (q *Queries) GetItemById(ctx context.Context, id uint64) (Item, error) {
-	row := q.db.QueryRowContext(ctx, getItemById, id)
+func (q *Queries) FindItemById(ctx context.Context, id uint64) (Item, error) {
+	row := q.db.QueryRowContext(ctx, findItemById, id)
 	var i Item
 	err := row.Scan(
 		&i.ID,
