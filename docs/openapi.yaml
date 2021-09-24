@@ -29,19 +29,6 @@ paths:
       summary: Create Item
       operationId: postItems
       description: 商品情報の登録
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/getItemsRequest'
-            examples:
-              body:
-                value:
-                  code: ITM0001
-                  name: string
-                  unit: string
-                  cost: 0
-        description: 登録情報
       tags:
         - item
       responses:
@@ -51,6 +38,8 @@ paths:
           $ref: '#/components/responses/errorResponse'
         '500':
           $ref: '#/components/responses/errorResponse'
+      requestBody:
+        $ref: '#/components/requestBodies/postItemsRequest'
     parameters: []
   '/items/{item_id}':
     parameters:
@@ -88,6 +77,8 @@ paths:
       description: 商品情報を更新
       tags:
         - item
+      requestBody:
+        $ref: '#/components/requestBodies/postItemsRequest'
 components:
   schemas:
     item:
@@ -148,30 +139,6 @@ components:
         - cost
         - created_at
         - updated_at
-    getItemsRequest:
-      title: postItemsRequest
-      type: object
-      description: 商品登録時の商品情報
-      properties:
-        code:
-          type: string
-          pattern: '^[A-Z][A-Z0-9]+'
-          description: 商品コード
-        name:
-          type: string
-          description: 商品名
-        unit:
-          type: string
-          description: 単位
-        cost:
-          type: number
-          format: float
-          description: 原価
-      required:
-        - code
-        - name
-        - unit
-        - cost
     id:
       type: integer
       title: Id
@@ -262,6 +229,48 @@ components:
               value:
                 code: 403
                 message: Forbidden
+  requestBodies:
+    postItemsRequest:
+      content:
+        application/json:
+          schema:
+            type: object
+            description: 商品登録時の商品情報
+            properties:
+              value:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    pattern: '^[A-Z][A-Z0-9]+'
+                    description: 商品コード
+                    example: ITM0001
+                  name:
+                    type: string
+                    description: 商品名
+                    example: item 0001
+                  unit:
+                    type: string
+                    description: 単位
+                    example: qty
+                  cost:
+                    type: number
+                    format: float
+                    description: 原価
+                    example: 1.5
+            required:
+              - name
+              - unit
+              - cost
+              - code
+          examples:
+            body:
+              value:
+                code: ITM0001
+                name: item 0001
+                unit: qty
+                cost: 1.5
+      description: ''
 security:
   - APIKey: []
 tags:
